@@ -3,7 +3,7 @@ services:
     name: cidade-hype
     env: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn --chdir backend backend.wsgi:application"
+    startCommand: "gunicorn wsgi:application"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
@@ -16,4 +16,6 @@ services:
       - key: DJANGO_ALLOWED_HOSTS
         value: ".onrender.com"
       - key: WEB_CONCURRENCY
-        value: 4 
+        value: 4
+      - key: PORT
+        value: 10000 
