@@ -2,6 +2,9 @@
 # exit on error
 set -o errexit
 
+# Atualizar pip
+python -m pip install --upgrade pip
+
 # Instalar dependências do projeto
 pip install -r requirements.txt
 
@@ -12,6 +15,9 @@ cd backend
 if [ -f "requirements.txt" ]; then
     pip install -r requirements.txt
 fi
+
+# Criar diretório para arquivos estáticos
+mkdir -p static
 
 # Coletar arquivos estáticos e aplicar migrações
 python manage.py collectstatic --no-input
