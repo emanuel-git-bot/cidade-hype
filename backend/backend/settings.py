@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-*mgtpu2rb!3=ez@kb+k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',')
+ALLOWED_HOSTS = ['cidade-hype.onrender.com']
 
 
 # Application definition
