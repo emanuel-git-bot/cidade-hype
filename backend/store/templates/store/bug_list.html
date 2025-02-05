@@ -1,0 +1,83 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Bugs - Cidade Hype Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Bugs Reportados</h5>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown">
+                        Filtrar por Status
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="?status=all">Todos</a></li>
+                        <li><a class="dropdown-item" href="?status=open">Abertos</a></li>
+                        <li><a class="dropdown-item" href="?status=in_progress">Em Andamento</a></li>
+                        <li><a class="dropdown-item" href="?status=resolved">Resolvidos</a></li>
+                        <li><a class="dropdown-item" href="?status=closed">Fechados</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Usuário</th>
+                                <th>Status</th>
+                                <th>Prioridade</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bug in bugs %}
+                            <tr>
+                                <td>#{{ bug.id }}</td>
+                                <td>{{ bug.title }}</td>
+                                <td>{{ bug.username }}</td>
+                                <td>
+                                    <span class="badge {% if bug.status == 'open' %}bg-danger{% elif bug.status == 'in_progress' %}bg-warning{% elif bug.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ bug.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge {% if bug.priority == 'critical' %}bg-danger{% elif bug.priority == 'high' %}bg-warning{% elif bug.priority == 'medium' %}bg-info{% else %}bg-secondary{% endif %}">
+                                        {{ bug.get_priority_display }}
+                                    </span>
+                                </td>
+                                <td>{{ bug.created_at|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'store:bug_detail' bug.id %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> Ver Detalhes
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center">Nenhum bug reportado.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .badge {
+        font-size: 0.875rem;
+        padding: 0.5em 0.75em;
+    }
+</style>
+{% endblock %} 

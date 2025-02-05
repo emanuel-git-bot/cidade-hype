@@ -1,0 +1,150 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Itens - Cidade Hype Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Itens</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Imagem</th>
+                            <th>Nome</th>
+                            <th>Categoria</th>
+                            <th>Preço</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>
+                                {% if item.image %}
+                                    <img src="{{ item.image.url }}" alt="{{ item.name }}" style="width: 50px; height: 50px; object-fit: cover;">
+                                {% else %}
+                                    <div class="bg-light text-center" style="width: 50px; height: 50px; line-height: 50px;">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.category.name }}</td>
+                            <td>R$ {{ item.price }}</td>
+                            <td>
+                                <a href="{% url 'store:item_edit' item.id %}" class="btn btn-sm btn-primary">Editar</a>
+                                <form action="{% url 'store:item_delete' item.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir este item?')">Excluir</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhum item cadastrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Novo Item</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'store:item_create' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Categoria</label>
+                        <select class="form-control" id="category" name="category" required>
+                            <option value="">Selecione uma categoria</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Preço</label>
+                        <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="observation" class="form-label">Observação</label>
+                        <textarea class="form-control" id="observation" name="observation" rows="2"></textarea>
+                        <div class="form-text">Detalhes sobre o que será entregue ao jogador</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Imagem</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Criar Item</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .preview-image {
+        max-width: 100%;
+        height: auto;
+        margin-top: 10px;
+        border-radius: 5px;
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview da imagem
+    document.getElementById('image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const preview = document.createElement('img');
+        preview.className = 'preview-image';
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        
+        const existingPreview = this.parentElement.querySelector('.preview-image');
+        if (existingPreview) {
+            existingPreview.remove();
+        }
+        
+        this.parentElement.appendChild(preview);
+        reader.readAsDataURL(file);
+    });
+
+    // Formatar preço
+    document.getElementById('price').addEventListener('input', function(e) {
+        let value = e.target.value;
+        value = value.replace(/[^0-9.]/g, '');
+        const parts = value.split('.');
+        if (parts.length > 1) {
+            parts[1] = parts[1].slice(0, 2);
+            value = parts.join('.');
+        }
+        e.target.value = value;
+    });
+</script>
+{% endblock %} 

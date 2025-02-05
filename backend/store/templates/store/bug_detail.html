@@ -1,0 +1,118 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Bug #{{ bug.id }} - Cidade Hype Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Bug #{{ bug.id }} - {{ bug.title }}</h5>
+                    <a href="{% url 'store:bug_list' %}" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Reportado por</h6>
+                        <p>{{ bug.username }} (ID: {{ bug.user_id }})</p>
+                        
+                        <h6 class="text-muted mt-3">Data</h6>
+                        <p>{{ bug.created_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Status</h6>
+                        <span class="badge {% if bug.status == 'open' %}bg-danger{% elif bug.status == 'in_progress' %}bg-warning{% elif bug.status == 'resolved' %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ bug.get_status_display }}
+                        </span>
+                        
+                        <h6 class="text-muted mt-3">Prioridade</h6>
+                        <span class="badge {% if bug.priority == 'critical' %}bg-danger{% elif bug.priority == 'high' %}bg-warning{% elif bug.priority == 'medium' %}bg-info{% else %}bg-secondary{% endif %}">
+                            {{ bug.get_priority_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <h6 class="text-muted">Descrição</h6>
+                <p class="mb-4">{{ bug.description|linebreaks }}</p>
+
+                <h6 class="text-muted">Passos para Reproduzir</h6>
+                <p class="mb-4">{{ bug.steps|linebreaks }}</p>
+
+                {% if bug.resolution_notes %}
+                <div class="alert alert-success">
+                    <h6 class="text-success mb-2">Notas de Resolução</h6>
+                    <p class="mb-0">{{ bug.resolution_notes|linebreaks }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Gerenciar Bug</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" class="mb-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_status">
+                    <div class="mb-3">
+                        <label class="form-label">Atualizar Status</label>
+                        <select name="status" class="form-control" onchange="this.form.submit()">
+                            {% for value, label in bug.STATUS_CHOICES %}
+                            <option value="{{ value }}" {% if value == bug.status %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+
+                <form method="post" class="mb-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_priority">
+                    <div class="mb-3">
+                        <label class="form-label">Atualizar Prioridade</label>
+                        <select name="priority" class="form-control" onchange="this.form.submit()">
+                            {% for value, label in bug.PRIORITY_CHOICES %}
+                            <option value="{{ value }}" {% if value == bug.priority %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+
+                {% if bug.status != 'resolved' and bug.status != 'closed' %}
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="resolve">
+                    <div class="mb-3">
+                        <label class="form-label">Notas de Resolução</label>
+                        <textarea name="resolution_notes" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-check"></i> Marcar como Resolvido
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .badge {
+        font-size: 0.875rem;
+        padding: 0.5em 0.75em;
+    }
+</style>
+{% endblock %} 

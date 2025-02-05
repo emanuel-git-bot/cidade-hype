@@ -1,0 +1,148 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Atualizações - Cidade Hype Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Atualizações</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Data</th>
+                            <th>Imagens</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for update in updates %}
+                        <tr>
+                            <td>{{ update.title }}</td>
+                            <td>{{ update.created_at|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {% if update.images.all %}
+                                    <span class="badge bg-info">{{ update.images.count }} imagens</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Sem imagens</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'store:update_edit' update.id %}" class="btn btn-sm btn-primary">Editar</a>
+                                <form action="{% url 'store:update_delete' update.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir esta atualização?')">Excluir</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">Nenhuma atualização cadastrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Nova Atualização</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'store:update_create' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="images" class="form-label">Imagens</label>
+                        <input type="file" class="form-control" id="images" name="images" multiple accept="image/*">
+                        <div class="form-text">Você pode selecionar múltiplas imagens</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="links" class="form-label">Links Relacionados</label>
+                        <div id="links-container">
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" name="link_titles[]" placeholder="Título do Link">
+                                <input type="url" class="form-control" name="link_urls[]" placeholder="URL">
+                                <button type="button" class="btn btn-danger remove-link">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-secondary" id="add-link">
+                            <i class="fas fa-plus"></i> Adicionar Link
+                        </button>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Criar Atualização</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Gerenciamento de links
+    document.getElementById('add-link').addEventListener('click', function() {
+        const container = document.getElementById('links-container');
+        const newLink = document.createElement('div');
+        newLink.className = 'input-group mb-2';
+        newLink.innerHTML = `
+            <input type="text" class="form-control" name="link_titles[]" placeholder="Título do Link">
+            <input type="url" class="form-control" name="link_urls[]" placeholder="URL">
+            <button type="button" class="btn btn-danger remove-link">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        container.appendChild(newLink);
+    });
+
+    document.getElementById('links-container').addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-link') || e.target.closest('.remove-link')) {
+            const linkDiv = e.target.closest('.input-group');
+            linkDiv.remove();
+        }
+    });
+
+    // Preview de imagens
+    document.getElementById('images').addEventListener('change', function(e) {
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'image-previews mt-2';
+        
+        Array.from(e.target.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('img');
+                preview.src = e.target.result;
+                preview.className = 'img-thumbnail me-2 mb-2';
+                preview.style.height = '100px';
+                previewContainer.appendChild(preview);
+            }
+            reader.readAsDataURL(file);
+        });
+
+        const existingPreview = this.parentElement.querySelector('.image-previews');
+        if (existingPreview) {
+            existingPreview.remove();
+        }
+        this.parentElement.appendChild(previewContainer);
+    });
+</script>
+{% endblock %} 

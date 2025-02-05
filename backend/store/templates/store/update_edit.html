@@ -1,0 +1,121 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Editar Atualização - Cidade Hype Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Editar Atualização</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'store:update_edit' update.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ update.title }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required>{{ update.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="images" class="form-label">Imagens</label>
+                        <input type="file" class="form-control" id="images" name="images" multiple accept="image/*">
+                        <div class="form-text">Você pode selecionar múltiplas imagens. Se selecionar novas imagens, as antigas serão substituídas.</div>
+                        
+                        {% if update.images.all %}
+                        <div class="mt-3">
+                            <h6>Imagens Atuais:</h6>
+                            <div class="d-flex flex-wrap">
+                                {% for img in update.images.all %}
+                                <div class="me-2 mb-2">
+                                    <img src="{{ img.image.url }}" alt="Update image" class="img-thumbnail" style="height: 100px;">
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="links" class="form-label">Links Relacionados</label>
+                        <div id="links-container">
+                            {% for link in update.links.all %}
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control" name="link_titles[]" value="{{ link.title }}" placeholder="Título do Link">
+                                <input type="url" class="form-control" name="link_urls[]" value="{{ link.url }}" placeholder="URL">
+                                <button type="button" class="btn btn-danger remove-link">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="btn btn-sm btn-secondary" id="add-link">
+                            <i class="fas fa-plus"></i> Adicionar Link
+                        </button>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'store:update_list' %}" class="btn btn-secondary">Voltar</a>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Gerenciamento de links
+    document.getElementById('add-link').addEventListener('click', function() {
+        const container = document.getElementById('links-container');
+        const newLink = document.createElement('div');
+        newLink.className = 'input-group mb-2';
+        newLink.innerHTML = `
+            <input type="text" class="form-control" name="link_titles[]" placeholder="Título do Link">
+            <input type="url" class="form-control" name="link_urls[]" placeholder="URL">
+            <button type="button" class="btn btn-danger remove-link">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        container.appendChild(newLink);
+    });
+
+    document.getElementById('links-container').addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-link') || e.target.closest('.remove-link')) {
+            const linkDiv = e.target.closest('.input-group');
+            linkDiv.remove();
+        }
+    });
+
+    // Preview de imagens
+    document.getElementById('images').addEventListener('change', function(e) {
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'image-previews mt-2';
+        
+        Array.from(e.target.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('img');
+                preview.src = e.target.result;
+                preview.className = 'img-thumbnail me-2 mb-2';
+                preview.style.height = '100px';
+                previewContainer.appendChild(preview);
+            }
+            reader.readAsDataURL(file);
+        });
+
+        const existingPreview = this.parentElement.querySelector('.image-previews');
+        if (existingPreview) {
+            existingPreview.remove();
+        }
+        this.parentElement.appendChild(previewContainer);
+    });
+</script>
+{% endblock %} 

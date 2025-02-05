@@ -1,0 +1,74 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Dashboard - Cidade Hype Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="display-4">{{ categories_count }}</h3>
+                <p class="text-muted mb-0">Categorias</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="display-4">{{ items_count }}</h3>
+                <p class="text-muted mb-0">Itens</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="display-4">{{ orders_count }}</h3>
+                <p class="text-muted mb-0">Pedidos</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Pedidos Recentes</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuário</th>
+                            <th>Item</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                        <tr>
+                            <td>#{{ order.id }}</td>
+                            <td>{{ order.username }}</td>
+                            <td>{{ order.item.name }}</td>
+                            <td>
+                                <span class="badge {% if order.status == 'pending' %}bg-warning{% elif order.status == 'paid' %}bg-success{% elif order.status == 'delivered' %}bg-info{% else %}bg-danger{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhum pedido recente.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,8 @@
+Django==5.0.1
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+Pillow==10.2.0  # Para manipulação de imagens
+python-dotenv==1.0.0  # Para variáveis de ambiente
+gunicorn==21.2.0  # Para servidor de produção
+whitenoise==6.6.0  # Para servir arquivos estáticos
+django-filter==23.5  # Para filtros avançados na API 

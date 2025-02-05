@@ -1,0 +1,126 @@
+{% extends 'store/base.html' %}
+
+{% block title %}Eventos - Cidade Hype Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Eventos</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Data</th>
+                            <th>Local</th>
+                            <th>Imagens</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                        <tr>
+                            <td>{{ event.title }}</td>
+                            <td>{{ event.date|date:"d/m/Y H:i" }}</td>
+                            <td>{{ event.location }}</td>
+                            <td>
+                                {% if event.images.all %}
+                                    <span class="badge bg-info">{{ event.images.count }} imagens</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Sem imagens</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'store:event_edit' event.id %}" class="btn btn-sm btn-primary">Editar</a>
+                                <form action="{% url 'store:event_delete' event.id %}" method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir este evento?')">Excluir</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Nenhum evento cadastrado.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Novo Evento</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'store:event_create' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="date" class="form-label">Data e Hora</label>
+                        <input type="datetime-local" class="form-control" id="date" name="date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Local</label>
+                        <input type="text" class="form-control" id="location" name="location" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="images" class="form-label">Imagens</label>
+                        <input type="file" class="form-control" id="images" name="images" multiple accept="image/*">
+                        <div class="form-text">Você pode selecionar múltiplas imagens</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Criar Evento</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .image-previews img {
+        max-height: 100px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview de imagens
+    document.getElementById('images').addEventListener('change', function(e) {
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'image-previews mt-2';
+        
+        Array.from(e.target.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('img');
+                preview.src = e.target.result;
+                preview.className = 'img-thumbnail';
+                previewContainer.appendChild(preview);
+            }
+            reader.readAsDataURL(file);
+        });
+
+        const existingPreview = this.parentElement.querySelector('.image-previews');
+        if (existingPreview) {
+            existingPreview.remove();
+        }
+        this.parentElement.appendChild(previewContainer);
+    });
+</script>
+{% endblock %} 
